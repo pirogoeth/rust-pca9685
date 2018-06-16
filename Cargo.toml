@@ -1,0 +1,6 @@
+[package]
+name = "rust-pca9685"
+version = "0.1.0"
+authors = ["Sean Johnson <sean@mailgun.com>"]
+
+[dependencies]
