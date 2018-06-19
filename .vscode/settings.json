@@ -1,3 +1,8 @@
 {
-    "rust-client.channel": "nightly"
+    "rust.racer_completion": true,
+    "rust.clear_env_rust_log": true,
+    "rust.build_on_save": true,
+    "rust-client.revealOutputChannelOn": "warn",
+    "rust-client.channel": "nightly",
+    "rust-client.updateOnStartup": true
 }
