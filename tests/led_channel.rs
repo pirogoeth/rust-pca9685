@@ -14,7 +14,7 @@ use rust_pca9685::{
         BASE_LED_OFF_LOW,
         BASE_LED_OFF_HIGH,
     },
-    led_register::{ LEDRegister },
+    led_channel::{ LEDChannel },
 };
 
 #[derive(Clone, Copy, Debug)]
@@ -66,8 +66,8 @@ const CHANNEL_REGISTERS: [ChannelRegisterQuad; 16] = [
 ];
 
 #[test]
-fn test_new_lr_over_max() {
-    let result = LEDRegister::new(16);
+fn test_new_lc_over_max() {
+    let result = LEDChannel::new(16);
     match result {
         Ok(_) => panic!("expected error, received ok"),
         Err(_) => return,
@@ -81,7 +81,7 @@ fn test_calculated_addrs_for_channel() {
     for i in 0..16 as u8 {
         debug!("calculate register addrs for channel {}", i);
 
-        let result = LEDRegister::new(i).unwrap();
+        let result = LEDChannel::new(i).unwrap();
         let expected = ChannelRegisterQuad(
             BASE_LED_ON_LOW + (4 * i),
             BASE_LED_ON_HIGH + (4 * i),
@@ -103,7 +103,7 @@ fn test_calculated_addrs_for_channel_with_regmap() {
 
     for i in 0..16 {
         let registers = CHANNEL_REGISTERS[i];
-        let result = LEDRegister::new(i as u8).unwrap();
+        let result = LEDChannel::new(i as u8).unwrap();
 
         debug!("channel {} should have addresses {}", i, registers);
 
@@ -113,11 +113,11 @@ fn test_calculated_addrs_for_channel_with_regmap() {
 }
 
 #[test]
-fn test_lr_read_channel_bytes() {
+fn test_lc_read_channel_bytes() {
     let _ = env_logger::try_init();
 
     let mut device = MockI2CDevice::new();
-    let channel = LEDRegister::new(0).unwrap();
+    let channel = LEDChannel::new(0).unwrap();
     let channel_values: [u8; 4] = [0xfe, 0xed, 0xb3, 0x3f];
 
     // Write `channel_values` to the mock device's register map
@@ -130,11 +130,11 @@ fn test_lr_read_channel_bytes() {
 }
 
 #[test]
-fn test_lr_write_channel_bytes() {
+fn test_lc_write_channel_bytes() {
     let _ = env_logger::try_init();
 
     let mut device = MockI2CDevice::new();
-    let channel = LEDRegister::new(1).unwrap();
+    let channel = LEDChannel::new(1).unwrap();
     let channel_values: [u8; 4] = [0xca, 0xfe, 0xba, 0xbe];
 
     // Write `channel_values` to the mock device using `write_channel`

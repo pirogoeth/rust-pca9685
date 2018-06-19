@@ -7,21 +7,21 @@ use ::{
 };
 
 #[derive(Clone, Copy, Debug)]
-pub struct LEDRegister {
+pub struct LEDChannel {
     // Must be between 0 and 15
     channel_num: u8,
 }
 
-impl LEDRegister {
+impl LEDChannel {
 
-    // Creates a LEDRegister at the specified channel register.
-    pub fn new(channel_num: u8) -> Result<LEDRegister, errors::ChannelRangeError> {
+    // Creates a LEDChannel at the specified channel register.
+    pub fn new(channel_num: u8) -> Result<LEDChannel, errors::ChannelRangeError> {
         if channel_num > 15 {
             return Err(errors::ChannelRangeError);
         }
 
         Ok(
-            LEDRegister{
+            LEDChannel{
                 channel_num: channel_num,
             }
         )
@@ -119,7 +119,7 @@ impl LEDRegister {
 
 }
 
-impl fmt::Display for LEDRegister {
+impl fmt::Display for LEDChannel {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
