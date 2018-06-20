@@ -12,6 +12,21 @@ pub struct LEDChannel {
     channel_num: u8,
 }
 
+impl fmt::Display for LEDChannel {
+
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "( ON_L: {:#x}, ON_H: {:#x}, OFF_L: {:#x}, OFF_H: {:#x} )",
+            self.on_low(),
+            self.on_high(),
+            self.off_low(),
+            self.off_high(),
+        )
+    }
+
+}
+
 impl LEDChannel {
 
     // Creates a LEDChannel at the specified channel register.
@@ -72,7 +87,7 @@ impl LEDChannel {
     // Reads the values for a LED channel's registers.
     // Will read one `u8` value from `on_addrs` and `off` addrs and return
     // a slice of the value.
-    pub fn read_channel<D: I2CDevice>(&self, dev: &mut D) -> Result<[u8; 4], D::Error> {
+    pub fn read_channel<'a, T: I2CDevice + 'a>(&self, dev: &'a mut T) -> Result<[u8; 4], T::Error> {
         let mut results = Vec::with_capacity(4);
 
         results.push(dev.smbus_read_byte_data(self.on_low()));
@@ -80,7 +95,7 @@ impl LEDChannel {
         results.push(dev.smbus_read_byte_data(self.off_low()));
         results.push(dev.smbus_read_byte_data(self.off_high()));
 
-        let mut bytes = Vec::new();
+        let mut bytes = Vec::with_capacity(4);
         for result in results {
             if result.is_err() {
                 return Err(result.unwrap_err());
@@ -98,7 +113,7 @@ impl LEDChannel {
     }
 
     // Writes the values in `data` into a channel's registers.
-    pub fn write_channel<D: I2CDevice>(&self, dev: &mut D, data: [u8; 4]) -> Result<(), D::Error> {
+    pub fn write_channel<'a, T: I2CDevice + 'a>(&self, dev: &'a mut T, data: [u8; 4]) -> Result<(), T::Error> {
         let mut results = Vec::with_capacity(4);
 
         let reg_addrs = vec![self.on_low(), self.on_high(), self.off_low(), self.off_high()];
@@ -115,21 +130,6 @@ impl LEDChannel {
         }
 
         Ok(())
-    }
-
-}
-
-impl fmt::Display for LEDChannel {
-
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "( ON_L: {:#x}, ON_H: {:#x}, OFF_L: {:#x}, OFF_H: {:#x} )",
-            self.on_low(),
-            self.on_high(),
-            self.off_low(),
-            self.off_high(),
-        )
     }
 
 }
