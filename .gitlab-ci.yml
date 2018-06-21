@@ -1,0 +1,44 @@
+---
+
+stages:
+  - check
+  - test
+  - publish
+
+cargo check:
+  image: containers.dev.maio.me/sjohnson/containers/rust:latest
+  stage: check
+  tags:
+    - amd64
+  script:
+    - cargo check
+
+cargo tests amd64:
+  image: containers.dev.maio.me/sjohnson/containers/rust:latest
+  stage: test
+  tags:
+    - amd64
+  script:
+    - cargo test
+
+cargo tests arm:
+  image: containers.dev.maio.me/sjohnson/rpi-containers/rust:latest
+  stage: test
+  tags:
+    - arm
+  script:
+    - cargo test
+
+pages:
+  image: containers.dev.maio.me/sjohnson/containers/rust:latest
+  stage: publish
+  tags:
+    - amd64
+  script:
+    - cargo doc --target-dir .
+    - mv doc public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
