@@ -1,14 +1,13 @@
-use rust_pca9685::constants;
-
 use env_logger;
+use i2cdev::core::I2CDevice;
 use i2cdev::linux::*;
 
-pub fn software_reset(dev: &mut LinuxI2CDevice) -> Result<(), LinuxI2CError> {
-    return software_reset(dev, constants::PCA9685_SLAVE_ADDRESS);
-}
+use ::constants;
 
-pub fn software_reset(dev: &mut LinuxI2CDevice, slave_addr: u8) -> Result<(), LinuxI2CError> {
+pub fn software_reset(dev: &mut LinuxI2CDevice, slave_addr: Option<u16>) -> Result<(), LinuxI2CError> {
     let _ = env_logger::try_init();
+
+    let slave_addr = slave_addr.unwrap_or(constants::PCA9685_SLAVE_ADDRESS);
 
     // Switch slave address to the I2C master address
     debug!("switching to master communication, sending soft reset");

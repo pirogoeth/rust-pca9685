@@ -5,7 +5,7 @@
 //
 
 // Default I2C slave address for the PCA9685
-pub const PCA9685_SLAVE_ADDRESS: u8 = 0x40;
+pub const PCA9685_SLAVE_ADDRESS: u16 = 0x40;
 
 // PCA9685 internal clock oscillation frequency
 pub const OSCILLATION_FREQ: f32 = 25000000.0;
@@ -21,7 +21,7 @@ pub const NUM_CHANNELS: i64 = 16;
 //
 
 // I2C master address
-pub const I2C_MASTER_ADDRESS: u8 = 0x00;
+pub const I2C_MASTER_ADDRESS: u16 = 0x00;
 
 // I2C master soft reset command
 pub const SOFT_RESET: u8 = 0x06;

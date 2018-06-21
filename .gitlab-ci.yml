@@ -5,11 +5,16 @@ stages:
   - test
   - publish
 
+.before_script: &pkgs_dependent_cc
+  - apt update
+  - apt install -y build-essential
+
 cargo check:
   image: containers.dev.maio.me/sjohnson/containers/rust:latest
   stage: check
   tags:
     - amd64
+  before_script: *pkgs_dependent_cc
   script:
     - cargo check
 
@@ -18,6 +23,7 @@ cargo tests amd64:
   stage: test
   tags:
     - amd64
+  before_script: *pkgs_dependent_cc
   script:
     - cargo test
 
@@ -26,6 +32,7 @@ cargo tests arm:
   stage: test
   tags:
     - arm
+  before_script: *pkgs_dependent_cc
   script:
     - cargo test
 
@@ -34,6 +41,7 @@ pages:
   stage: publish
   tags:
     - amd64
+  before_script: *pkgs_dependent_cc
   script:
     - cargo doc --target-dir .
     - mv doc public
