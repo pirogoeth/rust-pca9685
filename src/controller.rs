@@ -16,6 +16,24 @@ impl<'a, T: I2CDevice + 'a> Controller<'a, T> {
         }
     }
 
+    /// Set `channel_num`'s registers to the on/off values given.
+    /// Each channel has two 12-bit registers -- one for ON and one for OFF.
+    /// `set_channel` takes 2 `u16` values for on and off times and they are modified as such:
+    /// 
+    /// ```
+    /// let on: u16 = 0xfca;
+    /// let off: u16 = 0xaba;
+    /// 
+    /// let on_low: u8 = (on & 0xff) as u8;
+    /// let on_high: u8 = (on >> 8) as u8;
+    /// let off_low: u8 = (off & 0xff) as u8;
+    /// let off_high: u8 = (off >> 8) as u8;
+    /// 
+    /// assert_eq!(0xca, on_low);
+    /// assert_eq!(0x0f, on_high);
+    /// assert_eq!(0xba, off_low);
+    /// assert_eq!(0x0a, off_high);
+    /// ```
     pub fn set_channel(&mut self, channel_num: u8, on: u16, off: u16) -> Result<(), T::Error> {
         let channel = LEDChannel::new(channel_num).unwrap();
         let data = [
