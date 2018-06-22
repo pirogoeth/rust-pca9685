@@ -3,6 +3,7 @@ use i2cdev::core::*;
 use ::constants;
 use ::led_channel::LEDChannel;
 
+#[derive(Debug)]
 pub struct Controller<'a, T: I2CDevice + 'a> {
     device: &'a mut T,
 }

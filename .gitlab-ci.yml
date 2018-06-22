@@ -43,7 +43,7 @@ pages:
     - amd64
   before_script: *pkgs_dependent_cc
   script:
-    - cargo doc --target-dir .
+    - cargo doc --target-dir . --no-deps --lib
     - mv doc public
   artifacts:
     paths:

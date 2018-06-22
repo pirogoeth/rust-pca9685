@@ -1,12 +1,17 @@
 [package]
 name = "rust_pca9685"
+description = "A library for interacting with the Adafruit PCA9685"
+documentation = "https://sjohnson.maiome.xyz/rust-pca9685/"
+homepage = "https://glow.dev.maio.me/sjohnson/rust-pca9685"
+repository = "https://glow.dev.maio.me/sjohnson/rust-pca9685"
 version = "0.1.0"
 authors = ["Sean Johnson <sean.johnson@maio.me>", "Julian Itwaru <jrk57j@gmail.com>"]
+license = "MIT"
 
 [dependencies]
+env_logger = "0.5.10"
 i2cdev = "0.4.0"
 log = "0.4.0"
-env_logger = "0.5.10"
 
 [dev-dependencies]
 env_logger = "0.5.10"

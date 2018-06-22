@@ -4,43 +4,44 @@
 // Useful pub constants specific to the PCA9685.
 //
 
-// Default I2C slave address for the PCA9685
+/// Default I2C slave address for the PCA9685
 pub const PCA9685_SLAVE_ADDRESS: u16 = 0x40;
 
-// PCA9685 internal clock oscillation frequency
+/// PCA9685 internal clock oscillation frequency
 pub const OSCILLATION_FREQ: f32 = 25000000.0;
 
-// Number of steps available on a channel
+/// Number of steps available on a channel
 pub const STEP_SIZE: f32 = 4096.0;
 
-// Number of channels the PCA9685 has
+/// Number of channels the PCA9685 has
 pub const NUM_CHANNELS: i64 = 16;
 
 //
 // I2C MASTER
 //
 
-// I2C master address
+/// I2C master address
 pub const I2C_MASTER_ADDRESS: u16 = 0x00;
 
-// I2C master soft reset command
+/// I2C master soft reset command
 pub const SOFT_RESET: u8 = 0x06;
 
 //
 // REGISTERS
 //
 
-// Mode registers
+/// Mode 1 register
 pub const MODE_1: u8 = 0x00;
+/// Mode 2 register
 pub const MODE_2: u8 = 0x01;
 
-// I2C bus subaddresses
+/// I2C bus subaddresses
 pub const SUBADDR_1: u8 = 0x02;
 pub const SUBADDR_2: u8 = 0x03;
 pub const SUBADDR_3: u8 = 0x04;
 pub const PRE_SCALE: u8 = 0xFE;
 
-// Base values for a single LED register
+/// Base values for a single LED register
 pub const BASE_LED_ON_LOW: u8 = 0x06;
 pub const BASE_LED_ON_HIGH: u8 = 0x07;
 pub const BASE_LED_OFF_LOW: u8 = 0x08;
