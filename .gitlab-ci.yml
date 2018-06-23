@@ -45,6 +45,7 @@ pages:
   script:
     - cargo doc --target-dir . --no-deps --lib
     - mv doc public
+    - cp -v ci/docs/index.html public/index.html
   artifacts:
     paths:
       - public
