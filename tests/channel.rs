@@ -7,6 +7,7 @@ extern crate rust_pca9685;
 use i2cdev::mock::MockI2CDevice;
 use std::fmt;
 
+#[allow(unused_imports)]
 use rust_pca9685::{
     constants::{
         BASE_LED_ON_LOW,
@@ -14,25 +15,29 @@ use rust_pca9685::{
         BASE_LED_OFF_LOW,
         BASE_LED_OFF_HIGH,
     },
-    led_channel::{ LEDChannel },
+    channel::{
+        base::Channel,
+        led::LedChannel,
+        servo::ServoChannel,
+    },
+    errors,
 };
+
+//
+// CHANNELREGISTERQUAD
+//
 
 #[derive(Clone, Copy, Debug)]
 struct ChannelRegisterQuad(u8, u8, u8, u8);
 impl ChannelRegisterQuad {
-
     pub fn on_addrs(&self) -> (u8, u8) {
         (self.0, self.1)
     }
-
     pub fn off_addrs(&self) -> (u8, u8) {
         (self.2, self.3)
     }
-
 }
-
 impl fmt::Display for ChannelRegisterQuad {
-
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
@@ -43,7 +48,45 @@ impl fmt::Display for ChannelRegisterQuad {
             self.3,
         )
     }
+}
 
+//
+// TESTCHANNEL
+//
+
+#[derive(Clone, Copy, Debug)]
+struct TestChannel {
+    channel_num: u8,
+}
+impl Channel for TestChannel {
+    fn channel_num(&self) -> u8 {
+        return self.channel_num;
+    }
+}
+impl TestChannel {
+    pub fn new(channel_num: u8) -> Result<TestChannel, errors::ChannelRangeError> {
+        if channel_num > 15 {
+            return Err(errors::ChannelRangeError);
+        }
+
+        Ok(
+            TestChannel{
+                channel_num: channel_num,
+            }
+        )
+    }
+}
+impl fmt::Display for TestChannel {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "TestChannel<ON_L: {:#x}, ON_H: {:#x}, OFF_L: {:#x}, OFF_H: {:#x}>",
+            self.on_low(),
+            self.on_high(),
+            self.off_low(),
+            self.off_high(),
+        )
+    }
 }
 
 const CHANNEL_REGISTERS: [ChannelRegisterQuad; 16] = [
@@ -66,22 +109,13 @@ const CHANNEL_REGISTERS: [ChannelRegisterQuad; 16] = [
 ];
 
 #[test]
-fn test_new_lc_over_max() {
-    let result = LEDChannel::new(16);
-    match result {
-        Ok(_) => panic!("expected error, received ok"),
-        Err(_) => return,
-    }
-}
-
-#[test]
 fn test_calculated_addrs_for_channel() {
     let _ = env_logger::try_init();
 
     for i in 0..16 as u8 {
         debug!("calculate register addrs for channel {}", i);
 
-        let result = LEDChannel::new(i).unwrap();
+        let result = TestChannel::new(i).unwrap();
         let expected = ChannelRegisterQuad(
             BASE_LED_ON_LOW + (4 * i),
             BASE_LED_ON_HIGH + (4 * i),
@@ -103,7 +137,7 @@ fn test_calculated_addrs_for_channel_with_regmap() {
 
     for i in 0..16 {
         let registers = CHANNEL_REGISTERS[i];
-        let result = LEDChannel::new(i as u8).unwrap();
+        let result = TestChannel::new(i as u8).unwrap();
 
         debug!("channel {} should have addresses {}", i, registers);
 
@@ -113,11 +147,20 @@ fn test_calculated_addrs_for_channel_with_regmap() {
 }
 
 #[test]
-fn test_lc_read_channel_bytes() {
+fn test_new_ledchan_over_max() {
+    let result = LedChannel::new(16);
+    match result {
+        Ok(_) => panic!("expected error, received ok"),
+        Err(_) => return,
+    }
+}
+
+#[test]
+fn test_ledchan_read_channel_bytes() {
     let _ = env_logger::try_init();
 
     let mut device = MockI2CDevice::new();
-    let channel = LEDChannel::new(0).unwrap();
+    let channel = LedChannel::new(0).unwrap();
     let channel_values: [u8; 4] = [0xfe, 0xed, 0xb3, 0x3f];
 
     // Write `channel_values` to the mock device's register map
@@ -130,11 +173,11 @@ fn test_lc_read_channel_bytes() {
 }
 
 #[test]
-fn test_lc_write_channel_bytes() {
+fn test_ledchan_write_channel_bytes() {
     let _ = env_logger::try_init();
 
     let mut device = MockI2CDevice::new();
-    let channel = LEDChannel::new(1).unwrap();
+    let channel = LedChannel::new(1).unwrap();
     let channel_values: [u8; 4] = [0xca, 0xfe, 0xba, 0xbe];
 
     // Write `channel_values` to the mock device using `write_channel`
