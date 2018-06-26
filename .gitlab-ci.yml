@@ -32,11 +32,7 @@ cargo tests amd64:
       - target
 
 kcov cover amd64:
-  image:
-    name: containers.dev.maio.me/sjohnson/containers/kcov:latest
-    entrypoint:
-      - /bin/bash
-      - -c
+  image: containers.dev.maio.me/sjohnson/containers/kcov:latest
   stage: cover
   tags:
     - amd64
