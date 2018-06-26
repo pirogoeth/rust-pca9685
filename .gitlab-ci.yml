@@ -3,6 +3,7 @@
 stages:
   - check
   - test
+  - cover
   - publish
 
 .before_script: &pkgs_dependent_cc
@@ -26,6 +27,26 @@ cargo tests amd64:
   before_script: *pkgs_dependent_cc
   script:
     - cargo test
+  artifacts:
+    paths:
+      - target
+
+kcov cover amd64:
+  image: containers.dev.maio.me/sjohnson/containers/kcov:latest
+  stage: cover
+  tags:
+    - amd64
+  dependencies:
+    - cargo tests amd64
+  script:
+    - mkdir -p ./coverage/units ./coverage/doctest
+    - "find ./target/debug -regex '.*_test-[^.]*$' -depth 1 | xargs -n1 /app/bin/kcov --collect-only ./coverage/units"
+    - "find ./target/debug -regex 'rust_pca9685-[^.]*$' -depth 1 | xargs -n1 /app/bin/kcov --collect-only ./coverage/doctest"
+    - kcov --merge ./coverage ./coverage/units ./coverage/doctest
+  artifacts:
+    name: coverage
+    paths:
+      - coverage
 
 cargo tests arm:
   image: containers.dev.maio.me/sjohnson/rpi-containers/rust:latest
@@ -42,9 +63,12 @@ pages:
   tags:
     - amd64
   before_script: *pkgs_dependent_cc
+  dependencies:
+    - kcov cover amd64
   script:
     - cargo doc --target-dir . --no-deps --lib
     - mv doc public
+    - mv coverage public/coverage
     - cp -v ci/docs/index.html public/index.html
   artifacts:
     paths:
