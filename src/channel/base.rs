@@ -2,11 +2,16 @@ use i2cdev::core::*;
 
 use ::{
     constants,
-    errors,
+    channel::errors,
 };
 
-pub trait Channel {
+#[derive(Debug)]
+pub enum ChannelError {
+    IndexRange(errors::IndexRangeError),
+    ValueRange(errors::ValueRangeError),
+}
 
+pub trait Channel {
     /// Returns the channel index for the `Channel` impl.
     fn channel_num(&self) -> u8;
 

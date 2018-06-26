@@ -18,7 +18,6 @@ extern crate env_logger;
 
 pub mod constants;
 pub mod controller;
-pub mod errors;
 pub mod channel;
 #[cfg(target_os = "linux")]
 pub mod reset;
