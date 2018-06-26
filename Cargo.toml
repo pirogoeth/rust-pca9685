@@ -29,3 +29,7 @@ cli = ["quicli"]
 [[bin]]
 name = "pw2deg"
 required-features = ["cli"]
+
+[[bin]]
+name = "deg2pw"
+required-features = ["cli"]

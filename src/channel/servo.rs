@@ -96,7 +96,7 @@ impl ServoChannel {
     }
 
     /// Given a pulse time (µs), calculate the angle in degrees that the servo
-    /// should be moved to.
+    /// should be moved to. The angle space this is normalized to is (-90...90).
     /// 
     /// Based on Pimoroni's [pantilthat.pantilt module](https://github.com/pimoroni/pantilt-hat/blob/master/library/pantilthat/pantilt.py#L139)
     pub fn pulse_time_to_degrees(self, pulse: u16) -> Result<i32, errors::ValueRangeError> {
@@ -110,33 +110,31 @@ impl ServoChannel {
         debug!("pulse value {} is valid", pulse);
 
         let (min, max) = self.settings.servo_range();
-        let range = (max - min) as f32;
         debug!("servo range is {} -> {}", min, max);
-        debug!("value space is {}", range);
 
-        let distance: u16 = pulse - min;
-        debug!("pulse distance from min: {}", distance);
+        let servo_range = (max - min) as f32;
+        debug!("servo differential is {}", servo_range);
 
-        let scale: f32 = distance as f32 / range;
-        debug!("pulse distance scaled to range: {}", scale);
+        let pulse_diff = (pulse - min) as f32;
+        debug!("pulse differential is {}", pulse_diff);
 
-        let scaled: f32 = scale * 180.0;
-        debug!("scaled to degrees: {}", scaled);
+        let angle: f32 = pulse_diff / servo_range;
+        debug!("prescaled angle is {}", angle);
 
-        let angle = distance as f32 / scaled;
-        debug!("angle before finalize: {}", angle);
+        let angle: f32 = angle * 180.0;
+        debug!("scaled angle is {}", angle);
 
-        let angle = angle.round() - 90.0;
-        debug!("angle before trunc to i32: {}", angle);
+        let angle: i32 = angle.round() as i32;
+        debug!("rounded angle is {}", angle);
 
-        let angle = angle as i32;
-        debug!("finalized angle: {}", angle);
+        let angle: i32 = angle - 90;
+        debug!("normalized angle is {}", angle);
 
         Ok(angle)
     }
 
     /// Given an angle, calculate the pulse time in µs that the servo
-    /// should be moved to.
+    /// should be moved to. Expects the angle to be normalized on (-90...90)
     /// 
     /// Based on Pimoroni's [pantilthat.pantilt module](https://github.com/pimoroni/pantilt-hat/blob/master/library/pantilthat/pantilt.py#L139)
     pub fn degrees_to_pulse_time(self, angle: i32) -> Result<u16, errors::ValueRangeError> {
@@ -147,23 +145,24 @@ impl ServoChannel {
         debug!("angle value {} is valid", angle);
 
         let (min, max) = self.settings.servo_range();
-        let range = (max - min) as f32;
         debug!("servo range is {} -> {}", min, max);
-        debug!("value space is {}", range);
 
-        let angle = angle + 90;
-        debug!("normalized angle: {}", angle);
+        let servo_range = (max - min) as f32;
+        debug!("servo differential is {}", servo_range);
 
-        let scale: f32 = range / 180.0;
-        debug!("servo range scaled to angular space: {}", scale);
+        let angle: i32 = angle + 90;
+        debug!("denormalized angle: {}", angle);
 
-        let scaled: f32 = scale * angle as f32;
-        debug!("angle scaled by pulse width: {}", scaled);
+        let scale: f32 = servo_range / 180.0;
+        debug!("range scale is: {}", scale);
 
-        let pulse = min as f32 + scaled;
+        let scaled: f32 = (angle as f32) * scale;
+        debug!("scaled angle to servo differential: {}", scaled);
+
+        let pulse: u16 = min + (scaled as u16);
         debug!("finalized pulse: {}", pulse);
 
-        Ok(pulse as u16)
+        Ok(pulse)
     }
 
 }

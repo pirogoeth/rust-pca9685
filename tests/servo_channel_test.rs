@@ -79,16 +79,41 @@ fn test_srvchan_degree_to_pulse_conversion() {
 
     let channel = ServoChannel::new(1).unwrap();
 
-    let init = 3172;
-    debug!("testing degree -> pulse time conv with init={}", init);
+    let init = -77; // degrees
+    debug!("testing degree -> pulse time conv with init={}°", init);
 
-    let degrees = channel.pulse_time_to_degrees(init).unwrap();
-    debug!("init={} µs -> degrees: {}", init, degrees);
+    let pulse = channel.degrees_to_pulse_time(init).unwrap();
+    debug!("init={}° -> pulse time {} µs", init, pulse);
 
-    let pulse = channel.degrees_to_pulse_time(degrees).unwrap();
-    debug!("degrees={} -> pulse time: {} µs", degrees, pulse);
+    let degrees = channel.pulse_time_to_degrees(pulse).unwrap();
+    debug!("pulse time {} µs -> degrees {}°", pulse, degrees);
 
-    assert_eq!(init, pulse);
+    assert_eq!(init, degrees);
+}
+
+#[test]
+fn test_srvchan_pulse_to_degree_conversion() {
+    let _ = env_logger::try_init();
+
+    let channel = ServoChannel::new(1).unwrap();
+    let servo_min = channel.minimum_value();
+    let servo_max = channel.maximum_value();
+    let servo_error = (servo_max - servo_min) as f32 / 180.0;
+
+    let init: u16 = 700; // µs
+    debug!("testing pulse time -> degree conv with init={} µs", init);
+
+    let degrees: i32 = channel.pulse_time_to_degrees(init).unwrap();
+    debug!("init={} µs -> degrees: {}°", init, degrees);
+
+    let pulse: u16 = channel.degrees_to_pulse_time(degrees).unwrap();
+    debug!("degrees={}° -> pulse time: {} µs", degrees, pulse);
+
+    let lower_bound = (init as f32) - servo_error;
+    let upper_bound = (init as f32) + servo_error;
+    let pulse: f32 = pulse as f32;
+
+    assert!(lower_bound <= pulse && upper_bound >= pulse);
 }
 
 // #[test]
