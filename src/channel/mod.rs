@@ -4,5 +4,6 @@
 //! `ServoChannel` and `LedChannel` impls.
 
 pub mod base;
+pub mod errors;
 pub mod led;
 pub mod servo;

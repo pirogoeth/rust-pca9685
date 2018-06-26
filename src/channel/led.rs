@@ -1,7 +1,9 @@
 use std::fmt;
 
-use ::errors;
-use ::channel::base::Channel;
+use ::channel::{
+    base::Channel,
+    errors,
+};
 
 #[derive(Clone, Copy, Debug)]
 pub struct LedChannel {
@@ -11,9 +13,9 @@ pub struct LedChannel {
 impl LedChannel {
 
     /// Creates a `LedChannel` at the specified channel register.
-    pub fn new(channel_num: u8) -> Result<LedChannel, errors::ChannelRangeError> {
+    pub fn new(channel_num: u8) -> Result<LedChannel, errors::IndexRangeError> {
         if channel_num > 15 {
-            return Err(errors::ChannelRangeError);
+            return Err(errors::IndexRangeError);
         }
 
         Ok(
