@@ -36,6 +36,7 @@ kcov cover amd64:
     name: containers.dev.maio.me/sjohnson/containers/kcov:latest
     entrypoint:
       - /bin/bash
+      - -c
   stage: cover
   tags:
     - amd64
