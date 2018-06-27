@@ -17,7 +17,12 @@ cargo check:
     - amd64
   before_script: *pkgs_dependent_cc
   script:
+    - cargo clean
     - cargo check
+  cache:
+    policy: push
+    paths:
+      - target
 
 cargo tests amd64:
   image: containers.dev.maio.me/sjohnson/containers/rust:latest
@@ -27,9 +32,12 @@ cargo tests amd64:
   before_script: *pkgs_dependent_cc
   script:
     - cargo test
-  artifacts:
+  cache:
     paths:
       - target
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /\[skip[-_ ]tests\]/i
 
 kcov cover amd64:
   image: containers.dev.maio.me/sjohnson/containers/kcov:latest
@@ -41,21 +49,16 @@ kcov cover amd64:
   script:
     - mkdir -p ./coverage/units ./coverage/doctest
     - "find ./target/debug -maxdepth 1 -regex '.*_test-[^.]*$' | xargs -n1 /app/bin/kcov --collect-only ./coverage/units"
-    - "find ./target/debug -maxdepth 1 -regex 'rust_pca9685-[^.]*$' | xargs -n1 /app/bin/kcov --collect-only ./coverage/doctest"
+    - "find ./target/debug -maxdepth 1 -regex '.*rust_pca9685-[^.]*$' | xargs -n1 /app/bin/kcov --collect-only ./coverage/doctest"
     - kcov --merge ./coverage ./coverage/units ./coverage/doctest
+  cache:
+    policy: pull
+    paths:
+      - target
   artifacts:
     name: coverage
     paths:
       - coverage
-
-cargo tests arm:
-  image: containers.dev.maio.me/sjohnson/rpi-containers/rust:latest
-  stage: test
-  tags:
-    - arm
-  before_script: *pkgs_dependent_cc
-  script:
-    - cargo test
 
 pages:
   image: containers.dev.maio.me/sjohnson/containers/rust:latest
