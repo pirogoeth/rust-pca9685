@@ -33,6 +33,7 @@ cargo tests amd64:
   script:
     - cargo test
   cache:
+    policy: pull-push
     paths:
       - cargo
       - target
@@ -49,6 +50,7 @@ kcov cover amd64:
     - cargo tests amd64
   before_script: *cargo_home
   script:
+    - ls -la ./target/debug
     - mkdir -p ./coverage/units ./coverage/doctest
     - "find ./target/debug -maxdepth 1 -regex '.*_test-[^.]*$' | xargs -n1 /app/bin/kcov --collect-only ./coverage/units"
     - "find ./target/debug -maxdepth 1 -regex '.*rust_pca9685-[^.]*$' | xargs -n1 /app/bin/kcov --collect-only ./coverage/doctest"
