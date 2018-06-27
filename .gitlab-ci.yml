@@ -52,7 +52,7 @@ kcov cover amd64:
     - mkdir -p ./coverage/units ./coverage/doctest
     - "find ./target/debug -maxdepth 1 -regex '.*_test-[^.]*$' | xargs -n1 /app/bin/kcov --collect-only ./coverage/units"
     - "find ./target/debug -maxdepth 1 -regex '.*rust_pca9685-[^.]*$' | xargs -n1 /app/bin/kcov --collect-only ./coverage/doctest"
-    - kcov --merge ./coverage ./coverage/units ./coverage/doctest
+    - /app/bin/kcov --merge ./coverage ./coverage/units ./coverage/doctest
   cache:
     policy: pull
     paths:
