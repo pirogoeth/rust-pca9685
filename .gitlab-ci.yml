@@ -40,8 +40,8 @@ kcov cover amd64:
     - cargo tests amd64
   script:
     - mkdir -p ./coverage/units ./coverage/doctest
-    - "find ./target/debug -regex '.*_test-[^.]*$' -depth 1 | xargs -n1 /app/bin/kcov --collect-only ./coverage/units"
-    - "find ./target/debug -regex 'rust_pca9685-[^.]*$' -depth 1 | xargs -n1 /app/bin/kcov --collect-only ./coverage/doctest"
+    - "find ./target/debug -maxdepth 1 -regex '.*_test-[^.]*$' | xargs -n1 /app/bin/kcov --collect-only ./coverage/units"
+    - "find ./target/debug -maxdepth 1 -regex 'rust_pca9685-[^.]*$' | xargs -n1 /app/bin/kcov --collect-only ./coverage/doctest"
     - kcov --merge ./coverage ./coverage/units ./coverage/doctest
   artifacts:
     name: coverage
