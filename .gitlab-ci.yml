@@ -16,7 +16,7 @@ cargo tests amd64:
   before_script: *cargo_home
   script:
     - cargo clean
-    - cargo test
+    - RUSTFLAGS='-C link-dead-code' cargo test
   cache:
     policy: push
     paths:
