@@ -1,28 +1,12 @@
 ---
 
 stages:
-  - check
   - test
   - cover
   - publish
 
 .before_script: &cargo_home
   - export CARGO_HOME="$PWD/cargo"
-
-cargo check:
-  image: containers.dev.maio.me/sjohnson/containers/rust-gcc:latest
-  stage: check
-  tags:
-    - amd64
-  before_script: *cargo_home
-  script:
-    - cargo clean
-    - cargo check
-  cache:
-    policy: push
-    paths:
-      - cargo
-      - target
 
 cargo tests amd64:
   image: containers.dev.maio.me/sjohnson/containers/rust-gcc:latest
@@ -31,9 +15,10 @@ cargo tests amd64:
     - amd64
   before_script: *cargo_home
   script:
+    - cargo clean
     - cargo test
   cache:
-    policy: pull-push
+    policy: push
     paths:
       - cargo
       - target
@@ -51,6 +36,7 @@ kcov cover amd64:
   before_script: *cargo_home
   script:
     - mkdir -p ./coverage/units ./coverage/doctest
+    - ls ./target/debug
     - "find ./target/debug -maxdepth 1 -regex '.*_test-[^.]*$' | xargs -n1 /app/bin/kcov --exclude-pattern=/sjohnson/rust-pca9685/cargo ./coverage/units"
     - "find ./target/debug -maxdepth 1 -regex '.*rust_pca9685-[^.]*$' | xargs -n1 /app/bin/kcov --exclude-pattern=/sjohnson/rust-pca9685/cargo ./coverage/doctest"
     - /app/bin/kcov --merge ./coverage ./coverage/units ./coverage/doctest
