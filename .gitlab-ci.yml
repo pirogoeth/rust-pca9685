@@ -39,8 +39,8 @@ kcov cover amd64:
     - "find ./target/debug -maxdepth 1 -regex '.*_test-[^.]*$' | xargs -n1 /app/bin/kcov --exclude-pattern=/sjohnson/rust-pca9685/cargo ./coverage/units"
     - "find ./target/debug -maxdepth 1 -regex '.*rust_pca9685-[^.]*$' | xargs -n1 /app/bin/kcov --exclude-pattern=/sjohnson/rust-pca9685/cargo ./coverage/doctest"
     - /app/bin/kcov --merge ./coverage ./coverage/units ./coverage/doctest
-    - cat ./coverage/kcov-merged/coverage.json
-  coverage: '/"percent_covered": "\d+\.\d+"/'
+    - cat ./coverage/kcov-merged/coverage.json | jq '.percent_covered'
+  coverage: '/"\d+\.\d+"/'
   cache:
     policy: pull
     paths:
