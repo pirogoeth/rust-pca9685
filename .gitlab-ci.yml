@@ -1,51 +1,74 @@
 ---
 
 stages:
-  - check
   - test
+  - cover
   - publish
 
-.before_script: &pkgs_dependent_cc
-  - apt update
-  - apt install -y build-essential
-
-cargo check:
-  image: containers.dev.maio.me/sjohnson/containers/rust:latest
-  stage: check
-  tags:
-    - amd64
-  before_script: *pkgs_dependent_cc
-  script:
-    - cargo check
+.before_script: &cargo_home
+  - export CARGO_HOME="$PWD/cargo"
 
 cargo tests amd64:
-  image: containers.dev.maio.me/sjohnson/containers/rust:latest
+  image: containers.dev.maio.me/sjohnson/containers/rust-gcc:latest
   stage: test
   tags:
     - amd64
-  before_script: *pkgs_dependent_cc
+  before_script: *cargo_home
   script:
+    - cargo clean
     - cargo test
+  cache:
+    policy: push
+    paths:
+      - cargo
+      - target
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /\[skip[-_ ]tests\]/i
 
-cargo tests arm:
-  image: containers.dev.maio.me/sjohnson/rpi-containers/rust:latest
-  stage: test
+kcov cover amd64:
+  image: containers.dev.maio.me/sjohnson/containers/kcov:latest
+  stage: cover
   tags:
-    - arm
-  before_script: *pkgs_dependent_cc
+    - amd64
+  dependencies:
+    - cargo tests amd64
+  before_script: *cargo_home
   script:
-    - cargo test
+    - mkdir -p ./coverage/units ./coverage/doctest
+    - "find ./target/debug -maxdepth 1 -regex '.*_test-[^.]*$' | xargs -n1 /app/bin/kcov --exclude-pattern=/sjohnson/rust-pca9685/cargo ./coverage/units"
+    - "find ./target/debug -maxdepth 1 -regex '.*rust_pca9685-[^.]*$' | xargs -n1 /app/bin/kcov --exclude-pattern=/sjohnson/rust-pca9685/cargo ./coverage/doctest"
+    - /app/bin/kcov --merge ./coverage ./coverage/units ./coverage/doctest
+    - cat ./coverage/kcov-merged/coverage.json
+  coverage: '/"percent_covered": "\d+\.\d+"/'
+  cache:
+    policy: pull
+    paths:
+      - cargo
+      - target
+  artifacts:
+    name: coverage
+    paths:
+      - coverage
 
 pages:
-  image: containers.dev.maio.me/sjohnson/containers/rust:latest
+  image: containers.dev.maio.me/sjohnson/containers/rust-gcc:latest
   stage: publish
   tags:
     - amd64
-  before_script: *pkgs_dependent_cc
+  dependencies:
+    - kcov cover amd64
+  before_script: *cargo_home
   script:
     - cargo doc --target-dir . --no-deps --lib
     - mv doc public
+    - mv coverage public/coverage
     - cp -v ci/docs/index.html public/index.html
+  cache:
+    policy: pull
+    paths:
+      - cargo
+      - target
   artifacts:
     paths:
       - public
