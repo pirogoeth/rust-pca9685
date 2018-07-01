@@ -33,3 +33,7 @@ required-features = ["cli"]
 [[bin]]
 name = "deg2pw"
 required-features = ["cli"]
+
+[[bin]]
+name = "sweep"
+required-features = ["cli"]
