@@ -70,15 +70,15 @@ impl ServoChannel {
     }
 
     /// Checks if a value is in the configured range of the servo, based on `ServoSettings`
-    fn pulse_value_in_range(self, value: i32) -> Option<errors::ValueRangeError> {
+    fn pulse_value_in_range(self, value: f32) -> Option<errors::ValueRangeError> {
         let min = self.settings.min as i32;
         let max = self.settings.max as i32;
 
-        if value < min || value > max {
+        if value < min as f32 || value > max as f32 {
             return Some(errors::ValueRangeError::new(
-                min,
-                max,
-                value,
+                errors::Value::Int(min),
+                errors::Value::Int(max),
+                errors::Value::Float(value),
             ));
         }
 
@@ -99,10 +99,10 @@ impl ServoChannel {
     /// should be moved to. The angle space this is normalized to is (-90...90).
     /// 
     /// Based on Pimoroni's [pantilthat.pantilt module](https://github.com/pimoroni/pantilt-hat/blob/master/library/pantilthat/pantilt.py#L139)
-    pub fn pulse_time_to_degrees(self, pulse: u16) -> Result<i32, errors::ValueRangeError> {
+    pub fn pulse_time_to_degrees(self, pulse: u16) -> Result<f32, errors::ValueRangeError> {
         let _ = env_logger::try_init();
 
-        let valid = self.pulse_value_in_range(pulse as i32);
+        let valid = self.pulse_value_in_range(pulse as f32);
         if valid.is_some() {
             return Err(valid.unwrap());
         }
@@ -119,16 +119,16 @@ impl ServoChannel {
         debug!("pulse differential is {}", pulse_diff);
 
         let angle: f32 = pulse_diff / servo_range;
-        debug!("prescaled angle is {}", angle);
+        debug!("prescaled angle is {:.2}", angle);
 
         let angle: f32 = angle * 180.0;
-        debug!("scaled angle is {}", angle);
+        debug!("scaled angle is {:.2}", angle);
 
-        let angle: i32 = angle.round() as i32;
-        debug!("rounded angle is {}", angle);
+        let angle: f32 = angle.round();
+        debug!("rounded angle is {:.2}", angle);
 
-        let angle: i32 = angle - 90;
-        debug!("normalized angle is {}", angle);
+        let angle: f32 = angle - 90.0;
+        debug!("normalized angle is {:.2}", angle);
 
         Ok(angle)
     }
@@ -137,27 +137,31 @@ impl ServoChannel {
     /// should be moved to. Expects the angle to be normalized on (-90...90)
     /// 
     /// Based on Pimoroni's [pantilthat.pantilt module](https://github.com/pimoroni/pantilt-hat/blob/master/library/pantilthat/pantilt.py#L139)
-    pub fn degrees_to_pulse_time(self, angle: i32) -> Result<u16, errors::ValueRangeError> {
-        if angle < -90 || angle > 90 {
-            return Err(errors::ValueRangeError::new(-90, 90, angle));
+    pub fn degrees_to_pulse_time(self, angle: f32) -> Result<u16, errors::ValueRangeError> {
+        if angle < -90.0 || angle > 90.0 {
+            return Err(errors::ValueRangeError::new(
+                errors::Value::Int(-90),
+                errors::Value::Int(90),
+                errors::Value::Float(angle),
+            ));
         }
 
-        debug!("angle value {} is valid", angle);
+        debug!("angle value {:.2} is valid", angle);
 
         let (min, max) = self.settings.servo_range();
         debug!("servo range is {} -> {}", min, max);
 
         let servo_range = (max - min) as f32;
-        debug!("servo differential is {}", servo_range);
+        debug!("servo differential is {:.2}", servo_range);
 
-        let angle: i32 = angle + 90;
-        debug!("denormalized angle: {}", angle);
+        let angle: f32 = angle + 90.0;
+        debug!("denormalized angle: {:.2}", angle);
 
         let scale: f32 = servo_range / 180.0;
-        debug!("range scale is: {}", scale);
+        debug!("range scale is: {:.2}", scale);
 
         let scaled: f32 = (angle as f32) * scale;
-        debug!("scaled angle to servo differential: {}", scaled);
+        debug!("scaled angle to servo differential: {:.2}", scaled);
 
         let pulse: u16 = min + (scaled as u16);
         debug!("finalized pulse: {}", pulse);

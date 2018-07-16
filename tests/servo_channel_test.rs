@@ -79,7 +79,7 @@ fn test_srvchan_degree_to_pulse_conversion() {
 
     let channel = ServoChannel::new(1).unwrap();
 
-    let init = -77; // degrees
+    let init = -77.0; // degrees
     debug!("testing degree -> pulse time conv with init={}°", init);
 
     let pulse = channel.degrees_to_pulse_time(init).unwrap();
@@ -103,7 +103,7 @@ fn test_srvchan_pulse_to_degree_conversion() {
     let init: u16 = 700; // µs
     debug!("testing pulse time -> degree conv with init={} µs", init);
 
-    let degrees: i32 = channel.pulse_time_to_degrees(init).unwrap();
+    let degrees: f32 = channel.pulse_time_to_degrees(init).unwrap();
     debug!("init={} µs -> degrees: {}°", init, degrees);
 
     let pulse: u16 = channel.degrees_to_pulse_time(degrees).unwrap();

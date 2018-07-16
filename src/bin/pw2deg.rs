@@ -8,10 +8,13 @@ use rust_pca9685::channel::servo::{ ServoChannel, ServoSettings };
 struct Cli {
     #[structopt(long = "servo-min", short = "m", default_value = "0", help = "Servo pulse minimum value")]
     servo_min: u16,
+
     #[structopt(long = "servo-max", short = "x", default_value = "4095", help = "Servo pulse maximum value")]
     servo_max: u16,
+
     #[structopt(help = "Pulse length in µs")]
     pulse_length: u16,
+
     #[structopt(flatten)]
     verbosity: Verbosity,
 }
@@ -25,5 +28,5 @@ main!(|args: Cli, log_level: verbosity| {
     let pulse = args.pulse_length;
     let angle = channel.pulse_time_to_degrees(pulse)?;
 
-    println!("pulse {} (µs) -> angle {}°", pulse, angle);
+    println!("pulse {} (µs) -> angle {:.2}°", pulse, angle);
 });
